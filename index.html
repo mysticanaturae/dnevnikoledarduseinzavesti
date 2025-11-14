@@ -337,16 +337,32 @@ const anchorSignIdx = 14;
 
 let todayToneValue, todaySignValue, birthToneValue, birthSignValue;
 
-function saveToLocal(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
-function loadFromLocal(key){ return JSON.parse(localStorage.getItem(key)) || null; }
+function saveToLocal(key, value){ 
+  localStorage.setItem(key, JSON.stringify(value)); 
+}
+
+function loadFromLocal(key){ 
+  return JSON.parse(localStorage.getItem(key)) || null; 
+}
+
+// funkcija za odstranitev časa iz datuma
+function normalizeDate(d){
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
 
 function showKin(date, type){
-  const diffDays = Math.floor((date - anchorDate) / (1000*60*60*24));
+  const diffDays = Math.floor((normalizeDate(date) - normalizeDate(anchorDate)) / (1000*60*60*24));
   const tone = ((anchorTone - 1 + diffDays) % 13 + 13) % 13 + 1;
   const sign = ((anchorSignIdx - 1 + diffDays) % 20 + 20) % 20 + 1;
 
-  if(type==="today"){ todayToneValue = tone; todaySignValue = sign; }
-  else if(type==="birth"){ birthToneValue = tone; birthSignValue = sign; }
+  if(type==="today"){ 
+    todayToneValue = tone; 
+    todaySignValue = sign; 
+  }
+  else if(type==="birth"){ 
+    birthToneValue = tone; 
+    birthSignValue = sign; 
+  }
 
   const day = date.getDate().toString().padStart(2,'0');
   const month = (date.getMonth()+1).toString().padStart(2,'0');
