@@ -345,9 +345,8 @@ function loadFromLocal(key){
   return JSON.parse(localStorage.getItem(key)) || null; 
 }
 
-// funkcija za odstranitev časa iz datuma
 function normalizeDate(d){
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
 }
 
 function showKin(date, type){
