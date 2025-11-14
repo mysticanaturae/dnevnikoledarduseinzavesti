@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Dnevni Tzolkin koledar duše in zavesti</title>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Raleway:wght@300;400;600&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0b6b63">
+<style>
+:root{
+  --bg1:#02021a;
+  --bg2:#081428;
+  --card:#fffaf6;
+  --accent:#9ad7c2;
+  --text:#173a35;
+  --muted:#6a6a6a;
+}
+html,body{height:100%; margin:0; font-family:'Raleway',sans-serif; background:linear-gradient(180deg,var(--bg1),var(--bg2)); color:var(--card);}
+.stars, .stars:after {position:fixed; inset:0; z-index:0; pointer-events:none; background-image: radial-gradient(2px 2px #ffffff22, transparent 2px); background-repeat: repeat; opacity:0.35; animation: twinkle 12s linear infinite;}
+.stars:after{content:""; transform:scale(2); opacity:0.12; filter:blur(1.5px); animation-duration:20s;}
+@keyframes twinkle{0%{transform:translateY(0)} 50%{transform:translateY(-20px)} 100%{transform:translateY(0)}}
+.wrap {position:relative; z-index:2; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; box-sizing:border-box;}
+.card {width:100%; max-width:980px; background: linear-gradient(180deg, rgba(255,250,246,0.98), rgba(255,250,246,0.92)); border-radius:18px; padding:28px; box-shadow: 0 10px 40px rgba(2,6,23,0.6); color:var(--text); position:relative; overflow:hidden; border:1px solid rgba(255,255,255,0.06);}
+.card::before {content:""; position:absolute; inset:-40%; background: radial-gradient(circle at 20% 10%, rgba(154,215,194,0.12), transparent 12% ), radial-gradient(circle at 80% 80%, rgba(154,167,215,0.06), transparent 20% ); z-index:0; transform:rotate(6deg);}
+header{text-align:center; margin-bottom:8px;}
+header h1{font-family:'Great Vibes',cursive; color:#0b6b63; font-size:44px; margin:4px 0;}
+header p{color:var(--muted); margin:0 0 6px 0;}
+.grid{display:grid; grid-template-columns: 1fr 360px; gap:20px; align-items:start; position:relative; z-index:1;}
+@media (max-width:900px){.grid{grid-template-columns:1fr;} .rightCol{order:2}}
+.left { padding:10px 6px 6px 6px; }
+.bigKin { background:linear-gradient(180deg,#fff,#fff0); padding:18px; border-radius:12px; text-align:left; color:var(--text); box-shadow:0 8px 20px rgba(11,107,99,0.08); margin-bottom:20px;}
+.bigKin h2{margin:0;font-size:20px;color:#0b6b63}
+.bigKin .kinNumber{font-size:28px;font-weight:700;color:#0a5b50;margin-top:8px;}
+.kin-slike{display:flex; gap:8px; align-items:center; margin-top:8px;}
+.kin-slike img {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.4);
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(4px);
+  object-fit: contain; /* namesto cover */
+  padding: 4px; /* da številke ne trčijo ob rob */
+  box-shadow: 0 0 4px rgba(255,255,255,0.3);
+}
+
+/* Števila kina */
+#todayToneImg,
+#birthToneImg,
+#combinedToneImg {
+  width:36px;    /* manjše */
+  height:36px;
+}
+
+/* Znamenja ostanejo 48px */
+#todaySignImg,
+#birthSignImg,
+#combinedSignImg {
+  width:48px;
+  height:48px;
+}
+.description, .affirmation, .combinedMsg {margin-top:14px; padding:14px; background:#fff7f0; border-radius:10px; color:#2b3b36; box-shadow:inset 0 1px 0 rgba(255,255,255,0.6);}
+.rightCol { background: linear-gradient(180deg, rgba(11,107,99,0.03), rgba(11,107,99,0.01)); padding:14px; border-radius:12px; }
+label{display:block; font-size:14px; color:#285a53; margin-bottom:6px; font-weight:600}
+input[type="date"], input[type="email"], select{width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e6e6; box-sizing:border-box; font-size:15px; margin-bottom:10px}
+.controls {display:flex; gap:8px; flex-wrap:wrap;}
+button {padding:10px 12px; border-radius:10px; border:none; cursor:pointer; font-weight:600}
+.btnPrimary {background:linear-gradient(180deg,#0b6b63,#075046); color:#fff; box-shadow:0 6px 18px rgba(11,107,99,0.12)}
+.small {font-size:13px; padding:8px 10px}
+footer{margin-top:18px; text-align:center; color:var(--muted); font-size:13px}
+.note{font-size:13px;color:var(--muted); margin-top:8px}
+.pulse {
+  animation: pulse 2.5s infinite ease-in-out;
+  transform-origin: center;
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.15); opacity: 0.88; }
+  100% { transform: scale(1); opacity: 1; }
+}
+#energy-barometer {
+  width: 100%;
+  max-width: 500px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  font-family: sans-serif;
+}
+
+.bar-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bar-label {
+  width: 80px; /* širina za ime kategorije */
+  font-weight: bold;
+  text-transform: capitalize;
+}
+
+.bar-container {
+  flex: 1;
+  height: 20px;
+  background: #eee;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.bar {
+  height: 100%;
+  width: 0%; /* start na 0, raste v JS */
+  background: linear-gradient(90deg, #4EE88F, #9DFFF2);
+  transition: width 1.2s ease;
+  border-radius: 12px 0 0 12px;
+}
+  
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<div class="wrap">
+  <div class="card">
+    <header>
+      <h1>Dnevni koledar duše in zavesti</h1>
+      <p>Vsak dan je dar, vsaka energija priložnost. Tzolkin Koledar duše in zavesti ti razkriva, kako današnji kin, tvoj rojstni kin in osebni dnevni kin skupaj oblikujejo pot dneva za tvojo notranjo rast. Odkrij navdih, vodstvo in energijo, ki ti pomagajo živeti zavestno, slediti ritmu duše in uresničevati svojo svetlobo v vsakem trenutku. Vnesi svoj rojstni datum in email, da odkriješ svojo dnevno energijo duše in časa.</p>
+    </header>
+    <div class="grid">
+  <!-- LEVA KOLONA: Kin prikaz -->
+  <div class="left">
+    <div class="bigKin">
+      <h2 class="kin-naslov">Današnji Kin</h2>
+      <div id="todayKin" class="kinNumber">—</div>
+      <div class="kin-slike">
+        <img id="todayToneImg" class="pulse glow" src="" alt="Število dneva">
+        <img id="todaySignImg" class="pulse glow" src="" alt="Znamenje dneva">
+      </div>
+      <div id="todayDesc" class="description">—</div>
+      <div id="todayAff" class="affirmation">—</div>
+    </div>
+
+    <div class="bigKin">
+      <h2 class="kin-naslov">Rojstni Kin</h2>
+      <div id="birthKin" class="kinNumber">—</div>
+      <div class="kin-slike">
+        <img id="birthToneImg" class="pulse glow" src="" alt="Rojstno število">
+        <img id="birthSignImg" class="pulse glow" src="" alt="Rojstno znamenje">
+      </div>
+      <div id="birthToneDesc" class="description">—</div>
+      <div id="birthSignDesc" class="affirmation">—</div>
+    </div>
+
+    <div class="bigKin">
+      <h2 class="kin-naslov">Tvoja dnevna energija duše in časa</h2>
+      <div id="combinedKin" class="kinNumber">—</div>
+      <div class="kin-slike">
+        <img id="combinedToneImg" class="pulse glow" src="" alt="Število kombinacije">
+        <img id="combinedSignImg" class="pulse glow" src="" alt="Znamenje kombinacije">
+      </div>
+      <div id="combinedToneDesc" class="description">—</div>
+      <div id="combinedSignDesc" class="affirmation">—</div>
+    </div>
+  </div>
+
+  <!-- DESNA KOLONA: Obrazec in barometer -->
+  <div class="rightCol">
+  <label for="name">Ime</label>
+  <input id="name" type="text" placeholder="Tvoje ime" />
+
+  <label for="email">E-pošta (obvezno)</label>
+  <input id="email" type="email" placeholder="tvoje@elektronski.si"/>
+
+  <div style="display:flex;align-items:center;gap:8px;margin-top:5px;">
+    <input id="consent" type="checkbox" />
+    <label for="consent">Dovoljujem uporabo podatkov</label>
+  </div>
+
+  <label for="birthDate">Rojstni datum</label>
+  <input id="birthDate" type="date" />
+
+  <label for="dayChoice">Izberi energijo dneva</label>
+  <select id="dayChoice">
+    <option value="today">Uporabi današnji datum</option>
+    <option value="custom">Izberi datum</option>
+  </select>
+
+  <div id="customDateWrapper" style="display:none; margin-top:8px;">
+    <label for="customDate">Datum za izračun</label>
+    <input id="customDate" type="date" />
+  </div>
+
+  <button id="calcBtn" class="btnPrimary small">Izračunaj energijo</button>
+
+  <div id="energy-barometer">
+  <div class="bar-wrapper">
+    <span class="bar-label">Telo</span>
+    <div class="bar-container"><div class="bar" id="bar-telo"></div></div>
+  </div>
+  <div class="bar-wrapper">
+    <span class="bar-label">Um</span>
+    <div class="bar-container"><div class="bar" id="bar-um"></div></div>
+  </div>
+  <div class="bar-wrapper">
+    <span class="bar-label">Čustva</span>
+    <div class="bar-container"><div class="bar" id="bar-custva"></div></div>
+  </div>
+  <div class="bar-wrapper">
+    <span class="bar-label">Duša</span>
+    <div class="bar-container"><div class="bar" id="bar-dusa"></div></div>
+  </div>
+  <div class="bar-wrapper">
+    <span class="bar-label">Spirit</span>
+    <div class="bar-container"><div class="bar" id="bar-spirit"></div></div>
+  </div>
+  <div class="bar-wrapper">
+    <span class="bar-label">Vibracija</span>
+    <div class="bar-container"><div class="bar" id="bar-vibracija"></div></div>
+  </div>
+  <div class="bar-wrapper">
+    <span class="bar-label">Čas</span>
+    <div class="bar-container"><div class="bar" id="bar-cas"></div></div>
+  </div>
+</div>
+</div>
+
+<footer>© 2025 Mystica Naturae Dnevni Tzolkin koledar duše in zavesti</footer>
+  
+<script>
+const tzolkinNumberImages = [
+  "https://static.wixstatic.com/media/7535eb_8128aa403fb34a39a9abf4c539e07d4e~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_58d9713024fd44e3b574ed6e66319df3~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_fa772de6b389412a874060866aafe0d0~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_034123a9c80d497da70e29c529f761ab~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_0949be53659a4112b79aeaf88fba4182~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_31c0710a2c40451c8be0474fca598690~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_abc754938a3c47e5a3b497a802fbbc09~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_a195a39082484f0eafd271594204fd99~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_62f1b1f66190462faf5af9be6f04e3f3~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_630ea6308de14ff089b351e4f1967594~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_b098132554904e4d8d689176145249a0~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_6cf0d4b4439a46eb952d52e6cd02bb28~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_a5b6f5b75b254f1ca65fbe7cafb8086e~mv2.png"
+];
+
+const defaultKinImages = [
+  "https://static.wixstatic.com/media/7535eb_8b15827f3f0749f58b47edf2ec8ff34a~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_da5c22d0b20c4650ae78bd78d44bdf90~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_1431fb4ee97a418383209553a73974e5~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_63fa92348cef45778a33ea8df474f3b8~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_b144e80ceccc4304b10027e8d2f1e674~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_9eda107ea6ed46e8880d6cd3394b3eca~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_498008e2e9fb4c7ebc66e4a2cf25a1d4~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_a86c9fe89c5f4f4d8a810c284e40bf13~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_b1612f1d298245a483212ca3997b6872~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_fcf459036d31451fb913cd556bdf98b1~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_c5e4c01f59e74424806a8b82d55ea9c9~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_8b1bd5f0bebf4e9e84734d0dd7c18a55~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_5a43cbda692c4bff8790b8d4fe769ec5~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_891ac2c5109f44c8927f69170b93aa78~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_bcc1d28cea634696895554c9f25a2788~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_acd453dcd54e4ca29483cb610e3bab2e~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_d413aa3902864a09a3c2bb1ae2996b53~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_57d9eafe0dd249ddb5194e43a629e516~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_413ee006283f479dbb46cc737b796bb4~mv2.png"
+];
+
+const toneTexts = [
+  "1 – Začetki, akcija, fokus: danes odpri prostor novim priložnostim, pogumno stopaj naprej in zavestno izberi, kje bo tvoja energija.",
+  "2 – Prilagodljivost, ravnovesje: bodi kot voda – sprejemaj spremembe, išči harmonijo v odnosih in situacijah.",
+  "3 – Kreativnost, izražanje: danes izrazi svojo notranjo svetlobo skozi ustvarjanje, besede ali dejanja.",
+  "4 – Stabilnost, struktura: postavi temelje za dolgoročne projekte, pozornost na detajle prinaša varnost in moč.",
+  "5 – Spremembe, dinamika: sprejmi gibanje in spremembe; dan je primeren za prilagodljivost in raziskovanje novih poti.",
+  "6 – Harmonija, sodelovanje: gradi mostove, poveži se z drugimi in poišči ravnovesje med svojim in tujim.",
+  "7 – Refleksija, modrost: umiri misli, poslušaj svojo notranjo modrost in analiziraj izkušnje.",
+  "8 – Moč, uspeh: danes uresniči svoje cilje, izkoristi osebno moč in odločnost s pozitivno energijo.",
+  "9 – Učenje, introspektivnost: poglobi se vase, poišči nauke iz preteklih izkušenj in jih integriraj v življenje.",
+  "10 – Transformacija, preobrazba: odpri vrata spremembam, spusti stare vzorce in se osvobodi omejitev.",
+  "11 – Vizija, inspiracija: poslušaj intuicijo, dovoli duhovnim uvidom, da te vodijo in odprejo nove horizonte.",
+  "12 – Integracija, zaključki: združi izkušnje, poglej celotno sliko in zaključi, kar ni več potrebno za rast.",
+  "13 – Sinteza, razsvetljenje: dan je dar, da povežeš telo, dušo in um; izkušnje pretvori v višjo zavest."
+];
+
+const signTexts = [
+  "Krokodil / Imix – moč ustvarjanja: odpri se življenjski energiji, prepoznaj moč svojih začetkov in ustvarjalno igraj z možnostmi.",
+  "Veter / Ik – komunikacija: dovoli, da veter sprememb prinese nova spoznanja; poslušaj in izrazi resnico.",
+  "Zora / Akbal – introspektivnost: dan je primeren za sanjanje, meditacijo in vpogled v globine notranjega sveta.",
+  "Kuščar / Kan – obilje: bodi hvaležen za rast in plodove, ki jih nosi življenje; neguj obilje v sebi in okoli sebe.",
+  "Chicchan / Kača – vitalnost: poslušaj telo, energijo in strast; zdravje in strast vodita k življenjski moči.",
+  "Cimi / Smrt – transformacija: spusti stare vzorce, izpusti kar ti ne služi, da osvobodiš prostor za novo.",
+  "Jelen / Manik – zdravljenje: poveži se z naravo, poišči ravnovesje in zdravljenje telesa in duše.",
+  "Zajec / Lamat – obilje in lepota: uživaj v harmoniji, estetiki in ritmih narave; dan prinaša radost in lahkotnost.",
+  "Voda / Muluc – čustva: očisti notranje vode, dovoli čustvom, da te učijo in vodijo k notranjemu miru.",
+  "Pes / Oc – zvestoba: danes bodi prisoten, zaupljiv in povezan z družino ali bližnjimi; izrazi ljubezen.",
+  "Opica / Chuen – ustvarjalnost: igraj se, smej in eksperimentiraj; tvoja radost je v izražanju in spontanosti.",
+  "Cesta / Eb – pot: razišči svojo življenjsko pot, osredotoči se na namen in ravnovesje med koraki.",
+  "Trsje / Ben – rast: raziskuj, potuj, odkrivaj nove priložnosti in rasti z vsakim stikom in izkušnjo.",
+  "Jaguar / Ix – modrost: poslušaj intuicijo, poveži se z magijo narave in duhovnimi spoznanji.",
+  "Orel / Men – vizija: razširi obzorja, poglej višje in bolj jasno; vizija vodi k svobodi in širjenju duha.",
+  "Sova / Cib – učenje: prepoznaj globoko modrost, ki jo ponuja introspektivnost; dan za notranje vpoglede.",
+  "Zemlja / Caban – sprememba: poveži se z naravnimi cikli, bodi aktiven pri osebni evoluciji in spremembah.",
+  "Ogledalo / Etznab – resnica: zrcali sebe in druge, poišči resnico in jasnost v dejanjih in mislih.",
+  "Nevihta / Cauac – čiščenje: osvobodi energijo, očisti notranje in zunanje vzorce, preoblikuj življenje.",
+  "Sonce / Ahau – razsvetljenje: danes sije luč zavesti; bodi prisoten, povezan s celoto in izrazi svojo svetlobo."
+];
+  
+const signNames = [
+  "Krokodil",  //1
+  "Veter",     //2
+  "Zora",       //3
+  "Kuščar / Seme",    //4
+  "Kača",      //5
+  "Smrt",  //6 (Smrt/Most)
+  "Jelen",      //7
+  "Zajec / Zvezda",    //8
+  "Voda",      //9
+  "Pes",       //10
+  "Opica",     //11
+  "Cesta / Človek",    //12
+  "Trsje", //13
+  "Jaguar",  //14 (Mag)
+  "Orel",      //15
+  "Sova / Jastreb",      //16 (Nož/Št.)
+  "Zemlja / Kadilo",    //17
+  "Ogledalo / Kremen",    //18
+  "Nevihta",   //19
+  "Sonce"      //20
+];
+
+const anchorDate = new Date("1800-01-01");
+const anchorTone = 10;
+const anchorSignIdx = 14;
+
+let todayToneValue, todaySignValue, birthToneValue, birthSignValue;
+
+function saveToLocal(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+function loadFromLocal(key){ return JSON.parse(localStorage.getItem(key)) || null; }
+
+function showKin(date, type){
+  const diffDays = Math.floor((date - anchorDate) / (1000*60*60*24));
+  const tone = ((anchorTone - 1 + diffDays) % 13 + 13) % 13 + 1;
+  const sign = ((anchorSignIdx - 1 + diffDays) % 20 + 20) % 20 + 1;
+
+  if(type==="today"){ todayToneValue = tone; todaySignValue = sign; }
+  else if(type==="birth"){ birthToneValue = tone; birthSignValue = sign; }
+
+  const day = date.getDate().toString().padStart(2,'0');
+  const month = (date.getMonth()+1).toString().padStart(2,'0');
+  const year = date.getFullYear();
+  const formattedDate = `${day}.${month}.${year}`;
+
+  if(type==="today"){
+    document.getElementById("todayKin").innerText = `${tone} ${signNames[sign-1]} – ${formattedDate}`;
+    document.getElementById("todayToneImg").src = tzolkinNumberImages[tone-1];
+    document.getElementById("todaySignImg").src = defaultKinImages[sign-1];
+    document.getElementById("todayDesc").innerText = toneTexts[tone-1];
+    document.getElementById("todayAff").innerText = signTexts[sign-1];
+  } else {
+    document.getElementById("birthKin").innerText = `${tone} ${signNames[sign-1]}`;
+    document.getElementById("birthToneImg").src = tzolkinNumberImages[tone-1];
+    document.getElementById("birthSignImg").src = defaultKinImages[sign-1];
+    document.getElementById("birthToneDesc").innerText = toneTexts[tone-1];
+    document.getElementById("birthSignDesc").innerText = signTexts[sign-1];
+  }
+
+  calculateCombinedEnergy();
+  updateDailyEnergyBarometer();
+}
+
+function calculateKin(){
+  const birthInput = document.getElementById("birthDate").value;
+  const email = document.getElementById("email").value;
+
+  if(!birthInput || !email){
+    alert("Prosimo, vnesite rojstni datum in email.");
+    return;
+  }
+
+  saveToLocal("birthDate", birthInput);
+  saveToLocal("email", email);
+
+  const dayChoice = document.getElementById("dayChoice").value;
+  const calcDate = dayChoice === "custom" && document.getElementById("customDate").value 
+                   ? new Date(document.getElementById("customDate").value) 
+                   : new Date();
+
+  showKin(calcDate, "today");
+  showKin(new Date(birthInput), "birth");
+}
+
+function calculateCombinedEnergy(){
+  if(!todayToneValue || !todaySignValue || !birthToneValue || !birthSignValue) return;
+
+  const combinedTone = (todayToneValue + birthToneValue - 1) % 13 + 1;
+  const combinedSign = (todaySignValue + birthSignValue - 1) % 20 + 1;
+
+  document.getElementById("combinedKin").innerText = `${combinedTone} ${signNames[combinedSign-1]}`;
+  document.getElementById("combinedToneImg").src = tzolkinNumberImages[combinedTone-1];
+  document.getElementById("combinedSignImg").src = defaultKinImages[combinedSign-1];
+  document.getElementById("combinedToneDesc").innerText = toneTexts[combinedTone-1];
+  document.getElementById("combinedSignDesc").innerText = signTexts[combinedSign-1];
+}
+
+function updateDailyEnergyBarometer(){
+  if(!todayToneValue || !todaySignValue || !birthToneValue || !birthSignValue) return;
+
+  const combinedTone = (todayToneValue + birthToneValue - 1) % 13 + 1;
+  const combinedSign = (todaySignValue + birthSignValue - 1) % 20 + 1;
+
+  updateBarometer(combinedTone, combinedSign);
+}
+
+const barIds = [
+  "bar-telo","bar-um","bar-custva","bar-dusa",
+  "bar-spirit","bar-vibracija","bar-cas"
+];
+
+// ✨ Mistični energijski dih barometra
+function updateBarometer(tone, sign){
+  const tonePct = tone / 13;
+  const signPct = sign / 20;
+
+  const values = {
+    "bar-telo": signPct,
+    "bar-um": signPct * 0.85 + tonePct * 0.15,
+    "bar-custva": signPct,
+    "bar-dusa": tonePct,
+    "bar-spirit": (tonePct + signPct) / 2,
+    "bar-vibracija": tonePct,
+    "bar-cas": tonePct * 0.7 + signPct * 0.3
+  };
+
+  for (const id in values){
+    const el = document.getElementById(id);
+    const height = Math.floor(values[id] * 100);
+    el.style.height = `${height}%`;
+    el.style.background = `rgba(11,107,99, ${0.3 + values[id] * 0.5})`;
+    el.style.transition = "height 1s ease-in-out, background 1s ease-in-out";
+  }
+}
+
+// 🌬️ Energijska mikro-valovanja (prana)
+setInterval(() => {
+  document.querySelectorAll(".bar").forEach(bar => {
+    const h = parseFloat(bar.style.height);
+    const wave = Math.sin(Date.now()/60000) * 1.8;
+    bar.style.height = `${Math.min(Math.max(h + wave, 3), 100)}%`;
+  });
+}, 15000);
+
+// INIT
+document.getElementById("dayChoice").addEventListener("change", e=>{
+  document.getElementById("customDateWrapper").style.display = e.target.value==="custom"?"block":"none";
+});
+document.getElementById("calcBtn").addEventListener("click", calculateKin);
+
+window.onload = () => {
+  const savedBirth = loadFromLocal("birthDate");
+  const savedEmail = loadFromLocal("email");
+  if(savedBirth) document.getElementById("birthDate").value = savedBirth;
+  if(savedEmail) document.getElementById("email").value = savedEmail;
+
+  showKin(new Date(), "today");
+  if(savedBirth) showKin(new Date(savedBirth), "birth");
+};
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js')
+      .then(reg => console.log('Service Worker registered', reg))
+      .catch(err => console.log('Service Worker registration failed', err));
+  });
+}
+</script>
+</body>
+</html>

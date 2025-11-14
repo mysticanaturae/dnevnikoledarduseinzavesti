@@ -1,0 +1,21 @@
+{
+  "name": "Dnevni Tzolkin koledar duše in zavesti",
+  "short_name": "Tzolkin Koledar",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#02021a",
+  "theme_color": "#0b6b63",
+  "description": "Odkrij svojo dnevno energijo duše in zavesti, poveži rojstni kin in današnji kin ter sledi ritmu notranje rasti.",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
