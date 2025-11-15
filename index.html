@@ -420,6 +420,7 @@ function calculateCombinedEnergy(){
   document.getElementById("combinedSignDesc").innerText = signTexts[combinedSign-1];
 }
 
+// 🌞 Dnevna energija + rojstni kin
 function updateDailyEnergyBarometer(){
   if(!todayToneValue || !todaySignValue || !birthToneValue || !birthSignValue) return;
 
@@ -429,12 +430,13 @@ function updateDailyEnergyBarometer(){
   updateBarometer(combinedTone, combinedSign);
 }
 
+// ✨ Bar IDs
 const barIds = [
   "bar-telo","bar-um","bar-custva","bar-dusa",
   "bar-spirit","bar-vibracija","bar-cas"
 ];
 
-// ✨ Mistični energijski dih barometra
+// 🌬️ Mistični energijski barometer
 function updateBarometer(tone, sign){
   const tonePct = tone / 13;
   const signPct = sign / 20;
@@ -451,23 +453,23 @@ function updateBarometer(tone, sign){
 
   for (const id in values){
     const el = document.getElementById(id);
-    const height = Math.floor(values[id] * 100);
-    el.style.height = `${height}%`;
+    const width = Math.floor(values[id] * 100); // horizontalna dolžina
+    el.style.width = `${width}%`;
     el.style.background = `rgba(11,107,99, ${0.3 + values[id] * 0.5})`;
-    el.style.transition = "height 1s ease-in-out, background 1s ease-in-out";
+    el.style.transition = "width 1s ease-in-out, background 1s ease-in-out";
   }
 }
 
-// 🌬️ Energijska mikro-valovanja (prana)
+// 🌊 Energijska mikro-valovanja (subtilno “prana”)
 setInterval(() => {
   document.querySelectorAll(".bar").forEach(bar => {
-    const h = parseFloat(bar.style.height);
-    const wave = Math.sin(Date.now()/60000) * 1.8;
-    bar.style.height = `${Math.min(Math.max(h + wave, 3), 100)}%`;
+    const w = parseFloat(bar.style.width) || 0;
+    const wave = Math.sin(Date.now()/9000) * 1.5; // hitrost valovanja
+    bar.style.width = `${Math.min(Math.max(w + wave, 3), 100)}%`;
   });
-}, 15000);
+}, 200); // hitrejši interval za tekoč efekt
 
-// INIT
+// 📅 INIT
 document.getElementById("dayChoice").addEventListener("change", e=>{
   document.getElementById("customDateWrapper").style.display = e.target.value==="custom"?"block":"none";
 });
@@ -481,6 +483,9 @@ window.onload = () => {
 
   showKin(new Date(), "today");
   if(savedBirth) showKin(new Date(savedBirth), "birth");
+
+  // takoj po naložitvi posodobi barometer
+  updateDailyEnergyBarometer();
 };
 
 if ('serviceWorker' in navigator) {
