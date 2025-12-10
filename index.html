@@ -421,43 +421,29 @@ function calculateCombinedEnergy(){
   document.getElementById("combinedSignDesc").innerText = signTexts[combinedSign-1];
 }
 
-// 🌞 Dnevna energija + rojstni kin
-function updateDailyEnergyBarometer(){
-  if(!todayToneValue || !todaySignValue || !birthToneValue || !birthSignValue) return;
-
-  const combinedTone = (todayToneValue + birthToneValue - 1) % 13 + 1;
-  const combinedSign = (todaySignValue + birthSignValue - 1) % 20 + 1;
-
-  updateBarometer(combinedTone, combinedSign);
-}
-
-// ✨ Bar IDs
-const barIds = [
-  "bar-telo","bar-um","bar-custva","bar-dusa",
-  "bar-spirit","bar-vibracija","bar-cas"
-];
-
-// 🌬️ Mistični energijski barometer
 function updateBarometer(tone, sign){
   const tonePct = tone / 13;
   const signPct = sign / 20;
 
   const values = {
-    "bar-telo": signPct,
-    "bar-um": signPct * 0.85 + tonePct * 0.15,
-    "bar-custva": signPct,
-    "bar-dusa": tonePct,
-    "bar-spirit": (tonePct + signPct) / 2,
-    "bar-vibracija": tonePct,
-    "bar-cas": tonePct * 0.7 + signPct * 0.3
+    "bar-telo": { width: signPct, height: signPct },
+    "bar-um": { width: signPct * 0.85 + tonePct * 0.15, height: signPct * 0.85 + tonePct * 0.15 },
+    "bar-custva": { width: signPct, height: signPct },
+    "bar-dusa": { width: tonePct, height: tonePct },
+    "bar-spirit": { width: (tonePct + signPct)/2, height: (tonePct + signPct)/2 },
+    "bar-vibracija": { width: tonePct, height: tonePct },
+    "bar-cas": { width: tonePct*0.7 + signPct*0.3, height: tonePct*0.7 + signPct*0.3 }
   };
 
   for (const id in values){
     const el = document.getElementById(id);
-    const width = Math.floor(values[id] * 100); // horizontalna dolžina
-    el.style.width = `${width}%`;
-    el.style.background = `rgba(11,107,99, ${0.3 + values[id] * 0.5})`;
-    el.style.transition = "width 1s ease-in-out, background 1s ease-in-out";
+    const w = Math.floor(values[id].width*100);
+    const h = values[id].height*100;
+    el.dataset.baseHeight = h;
+    el.style.width = `${w}%`;
+    el.style.height = `${h}%`;
+    el.style.background = `rgba(11,107,99, ${0.3 + values[id].height} )`;
+    el.style.transition = "width 1s ease-in-out, height 1s ease-in-out, background 1s ease-in-out";
   }
 }
 
