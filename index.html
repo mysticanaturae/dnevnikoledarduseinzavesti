@@ -422,44 +422,6 @@ function calculateCombinedEnergy(){
 }
 
 function updateBarometer(tone, sign){
-  const tonePct = tone / 13;
-  const signPct = sign / 20;
-
-  const values = {
-    "bar-telo": { width: signPct, height: signPct },
-    "bar-um": { width: signPct * 0.85 + tonePct * 0.15, height: signPct * 0.85 + tonePct * 0.15 },
-    "bar-custva": { width: signPct, height: signPct },
-    "bar-dusa": { width: tonePct, height: tonePct },
-    "bar-spirit": { width: (tonePct + signPct)/2, height: (tonePct + signPct)/2 },
-    "bar-vibracija": { width: tonePct, height: tonePct },
-    "bar-cas": { width: tonePct*0.7 + signPct*0.3, height: tonePct*0.7 + signPct*0.3 }
-  };
-
-  for (const id in values){
-    const el = document.getElementById(id);
-    const w = Math.floor(values[id].width*100);
-    const h = values[id].height*100;
-    el.dataset.baseHeight = h;
-    el.style.width = `${w}%`;
-    el.style.height = `${h}%`;
-    el.style.background = `rgba(11,107,99, ${0.3 + values[id].height} )`;
-    el.style.transition = "width 1s ease-in-out, height 1s ease-in-out, background 1s ease-in-out";
-  }
-}
-
-// ✨ Mistični energijski dih barometra – subtilno dihanje
-setInterval(() => {
-  const t = Date.now() / 4000; // počasnejše valovanje
-  document.querySelectorAll(".bar").forEach(bar => {
-    const baseHeight = parseFloat(bar.dataset.baseHeight || bar.style.height) || 0;
-    const wave = Math.sin(t) * 1.5; // ±1.5% nihanje
-    const newHeight = Math.min(Math.max(baseHeight + wave, 3), 100);
-    bar.style.height = `${newHeight}%`;
-  });
-}, 50);
-
-// Ob izračunu nastavimo "osnovno višino" barov
-function updateBarometer(tone, sign){
   const tonePct = tone / 13 * 100;
   const signPct = sign / 20 * 100;
 
@@ -476,12 +438,23 @@ function updateBarometer(tone, sign){
   for (const id in values){
     const el = document.getElementById(id);
     const height = values[id];
-    el.dataset.baseHeight = height; // shrani osnovno višino
+    el.dataset.baseHeight = height; // shrani osnovno višino za pulse animacijo
     el.style.height = `${height}%`;
     el.style.background = `rgba(11,107,99, ${0.3 + height/100 * 0.5})`;
     el.style.transition = "height 1s ease-in-out, background 1s ease-in-out";
   }
 }
+
+// ✨ Mistični energijski dih barometra
+setInterval(() => {
+  const t = Date.now() / 4000;
+  document.querySelectorAll(".bar").forEach(bar => {
+    const baseHeight = parseFloat(bar.dataset.baseHeight) || 0;
+    const wave = Math.sin(t) * 1.5; // ±1.5% nihanje
+    const newHeight = Math.min(Math.max(baseHeight + wave, 3), 100);
+    bar.style.height = `${newHeight}%`;
+  });
+}, 50);
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
