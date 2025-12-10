@@ -266,7 +266,8 @@ const defaultKinImages = [
   "https://static.wixstatic.com/media/7535eb_acd453dcd54e4ca29483cb610e3bab2e~mv2.png",
   "https://static.wixstatic.com/media/7535eb_d413aa3902864a09a3c2bb1ae2996b53~mv2.png",
   "https://static.wixstatic.com/media/7535eb_57d9eafe0dd249ddb5194e43a629e516~mv2.png",
-  "https://static.wixstatic.com/media/7535eb_413ee006283f479dbb46cc737b796bb4~mv2.png"
+  "https://static.wixstatic.com/media/7535eb_413ee006283f479dbb46cc737b796bb4~mv2.png",
+  "https://static.wixstatic.com/media/7535eb_18fc81a965aa4e69974f11d5bb68dc60~mv2.png"
 ];
 
 const toneTexts = [
@@ -460,33 +461,41 @@ function updateBarometer(tone, sign){
   }
 }
 
-// 🌊 Energijska mikro-valovanja (subtilno “prana”)
+// ✨ Mistični energijski dih barometra – subtilno dihanje
 setInterval(() => {
+  const t = Date.now() / 4000; // počasnejše valovanje
   document.querySelectorAll(".bar").forEach(bar => {
-    const w = parseFloat(bar.style.width) || 0;
-    const wave = Math.sin(Date.now()/9000) * 1.5; // hitrost valovanja
-    bar.style.width = `${Math.min(Math.max(w + wave, 3), 100)}%`;
+    const baseHeight = parseFloat(bar.dataset.baseHeight || bar.style.height) || 0;
+    const wave = Math.sin(t) * 1.5; // ±1.5% nihanje
+    const newHeight = Math.min(Math.max(baseHeight + wave, 3), 100);
+    bar.style.height = `${newHeight}%`;
   });
-}, 200); // hitrejši interval za tekoč efekt
+}, 50);
 
-// 📅 INIT
-document.getElementById("dayChoice").addEventListener("change", e=>{
-  document.getElementById("customDateWrapper").style.display = e.target.value==="custom"?"block":"none";
-});
-document.getElementById("calcBtn").addEventListener("click", calculateKin);
+// Ob izračunu nastavimo "osnovno višino" barov
+function updateBarometer(tone, sign){
+  const tonePct = tone / 13 * 100;
+  const signPct = sign / 20 * 100;
 
-window.onload = () => {
-  const savedBirth = loadFromLocal("birthDate");
-  const savedEmail = loadFromLocal("email");
-  if(savedBirth) document.getElementById("birthDate").value = savedBirth;
-  if(savedEmail) document.getElementById("email").value = savedEmail;
+  const values = {
+    "bar-telo": signPct,
+    "bar-um": signPct * 0.85 + tonePct * 0.15,
+    "bar-custva": signPct,
+    "bar-dusa": tonePct,
+    "bar-spirit": (tonePct + signPct) / 2,
+    "bar-vibracija": tonePct,
+    "bar-cas": tonePct * 0.7 + signPct * 0.3
+  };
 
-  showKin(new Date(), "today");
-  if(savedBirth) showKin(new Date(savedBirth), "birth");
-
-  // takoj po naložitvi posodobi barometer
-  updateDailyEnergyBarometer();
-};
+  for (const id in values){
+    const el = document.getElementById(id);
+    const height = values[id];
+    el.dataset.baseHeight = height; // shrani osnovno višino
+    el.style.height = `${height}%`;
+    el.style.background = `rgba(11,107,99, ${0.3 + height/100 * 0.5})`;
+    el.style.transition = "height 1s ease-in-out, background 1s ease-in-out";
+  }
+}
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
