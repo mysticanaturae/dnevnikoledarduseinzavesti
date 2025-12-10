@@ -231,6 +231,9 @@ footer{margin-top:18px; text-align:center; color:var(--muted); font-size:13px}
 <footer>© 2025 Mystica Naturae Dnevni Tzolkin koledar duše in zavesti</footer>
   
 <script>
+// ===============================
+//      TZOLKIN KONFIGURACIJA
+// ===============================
 const tzolkinNumberImages = [
   "https://static.wixstatic.com/media/7535eb_8128aa403fb34a39a9abf4c539e07d4e~mv2.png",
   "https://static.wixstatic.com/media/7535eb_58d9713024fd44e3b574ed6e66319df3~mv2.png",
@@ -308,34 +311,17 @@ const signTexts = [
   "Nevihta / Cauac – čiščenje: osvobodi energijo, očisti notranje in zunanje vzorce, preoblikuj življenje.",
   "Sonce / Ahau – razsvetljenje: danes sije luč zavesti; bodi prisoten, povezan s celoto in izrazi svojo svetlobo."
 ];
-  
+
 const signNames = [
-  "Krokodil",  //1
-  "Veter",     //2
-  "Zora",       //3
-  "Kuščar / Seme",    //4
-  "Kača",      //5
-  "Smrt",  //6 (Smrt/Most)
-  "Jelen",      //7
-  "Zajec / Zvezda",    //8
-  "Voda",      //9
-  "Pes",       //10
-  "Opica",     //11
-  "Cesta / Človek",    //12
-  "Trsje", //13
-  "Jaguar",  //14 (Mag)
-  "Orel",      //15
-  "Sova / Jastreb",      //16 (Nož/Št.)
-  "Zemlja / Kadilo",    //17
-  "Ogledalo / Kremen",    //18
-  "Nevihta",   //19
-  "Sonce"      //20
+  "Krokodil", "Veter", "Zora", "Kuščar / Seme", "Kača", "Smrt", "Jelen",
+  "Zajec / Zvezda", "Voda", "Pes", "Opica", "Cesta / Človek", "Trsje",
+  "Jaguar", "Orel", "Sova / Jastreb", "Zemlja / Kadilo", "Ogledalo / Kremen",
+  "Nevihta", "Sonce"
 ];
 
 // ===============================
-//       TZOLKIN KONFIG
+//       ANCHOR DATE
 // ===============================
-
 const anchorDate = new Date("1800-01-01");
 const anchorTone = 10;
 const anchorSignIdx = 14;
@@ -343,45 +329,30 @@ const anchorSignIdx = 14;
 let todayToneValue, todaySignValue, birthToneValue, birthSignValue;
 
 // ===============================
-//        LOCAL STORAGE
+//       LOCAL STORAGE
 // ===============================
-function saveToLocal(key, value){ 
-  localStorage.setItem(key, JSON.stringify(value)); 
-}
-
-function loadFromLocal(key){ 
-  return JSON.parse(localStorage.getItem(key)) || null; 
-}
+function saveToLocal(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+function loadFromLocal(key){ return JSON.parse(localStorage.getItem(key)) || null; }
 
 // ===============================
-//     NORMALIZACIJA DATUMOV
+//      NORMALIZACIJA DATUMOV
 // ===============================
-function normalizeDate(d){
-  return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-}
+function normalizeDate(d){ return new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); }
 
 // ===============================
-//         IZRAČUN KINA
+//         PRIKAZ KINA
 // ===============================
 function showKin(date, type){
+  if(!(date instanceof Date) || isNaN(date)) return;
+
   const diffDays = Math.floor((normalizeDate(date) - normalizeDate(anchorDate)) / (1000*60*60*24));
-  
   const tone = ((anchorTone - 1 + diffDays) % 13 + 13) % 13 + 1;
   const sign = ((anchorSignIdx - 1 + diffDays) % 20 + 20) % 20 + 1;
 
-  if(type==="today"){ 
-    todayToneValue = tone; 
-    todaySignValue = sign; 
-  }
-  else if(type==="birth"){ 
-    birthToneValue = tone; 
-    birthSignValue = sign; 
-  }
+  if(type==="today"){ todayToneValue=tone; todaySignValue=sign; }
+  else if(type==="birth"){ birthToneValue=tone; birthSignValue=sign; }
 
-  const day = date.getUTCDate().toString().padStart(2,'0');
-  const month = (date.getUTCMonth()+1).toString().padStart(2,'0');
-  const year = date.getUTCFullYear();
-  const formattedDate = `${day}.${month}.${year}`;
+  const formattedDate = `${date.getUTCDate().toString().padStart(2,'0')}.${(date.getUTCMonth()+1).toString().padStart(2,'0')}.${date.getUTCFullYear()}`;
 
   if(type==="today"){
     document.getElementById("todayKin").innerText = `${tone} ${signNames[sign-1]} – ${formattedDate}`;
@@ -401,9 +372,8 @@ function showKin(date, type){
   updateDailyEnergyBarometer();
 }
 
-
 // ===============================
-//         GLAVNI GUMB
+//       GLAVNI GUMB
 // ===============================
 function calculateKin(){
   const birthInput = document.getElementById("birthDate").value;
@@ -418,17 +388,18 @@ function calculateKin(){
   saveToLocal("email", email);
 
   const dayChoice = document.getElementById("dayChoice").value;
-  const calcDate = dayChoice === "custom" && document.getElementById("customDate").value 
-                   ? new Date(document.getElementById("customDate").value) 
+  const calcDate = dayChoice==="custom" && document.getElementById("customDate").value
+                   ? new Date(document.getElementById("customDate").value)
                    : new Date();
 
-  showKin(calcDate, "today");
-  showKin(new Date(birthInput), "birth");
+  if(calcDate.toString() === "Invalid Date"){ alert("Prosimo, vnesite veljaven datum."); return; }
+
+  showKin(calcDate,"today");
+  showKin(new Date(birthInput),"birth");
 }
 
-
 // ===============================
-//  KOMBINIRANA ENERGIJA (DAN + ROJSTVO)
+//  KOMBINIRANA ENERGIJA
 // ===============================
 function calculateCombinedEnergy(){
   if(!todayToneValue || !todaySignValue || !birthToneValue || !birthSignValue) return;
@@ -443,52 +414,45 @@ function calculateCombinedEnergy(){
   document.getElementById("combinedSignDesc").innerText = signTexts[combinedSign-1];
 }
 
-
 // ===============================
 //          BAROMETER
 // ===============================
-
-// 💗 Pastelne barve za vsak bar posebej
 const pastelColors = {
-  "bar-telo": "rgba(255,182,193,",      // light pink
-  "bar-um": "rgba(176,196,222,",        // light steel blue
-  "bar-custva": "rgba(255,218,185,",    // peach puff
-  "bar-dusa": "rgba(221,160,221,",      // plum
-  "bar-spirit": "rgba(152,251,152,",    // light green
-  "bar-vibracija": "rgba(240,230,140,", // khaki
-  "bar-cas": "rgba(135,206,250,"        // light sky blue
+  "bar-telo": "rgba(255,182,193,",       // light pink
+  "bar-um": "rgba(176,196,222,",         // light steel blue
+  "bar-custva": "rgba(255,218,185,",     // peach puff
+  "bar-dusa": "rgba(221,160,221,",       // plum
+  "bar-spirit": "rgba(152,251,152,",     // light green
+  "bar-vibracija": "rgba(240,230,140,",  // khaki
+  "bar-cas": "rgba(135,206,250,"         // light sky blue
 };
 
-// 🌟 Glavna funkcija za nastavitev energije
 function updateBarometer(tone, sign){
   const tonePct = tone / 13 * 100;
   const signPct = sign / 20 * 100;
 
   const values = {
     "bar-telo": signPct,
-    "bar-um": signPct * 0.85 + tonePct * 0.15,
+    "bar-um": signPct*0.85 + tonePct*0.15,
     "bar-custva": signPct,
     "bar-dusa": tonePct,
-    "bar-spirit": (tonePct + signPct) / 2,
+    "bar-spirit": (tonePct+signPct)/2,
     "bar-vibracija": tonePct,
-    "bar-cas": tonePct * 0.7 + signPct * 0.3
+    "bar-cas": tonePct*0.7 + signPct*0.3
   };
 
-  for (const id in values){
+  for(const id in values){
     const el = document.getElementById(id);
+    if(!el) continue;
     const height = values[id];
-
-    el.dataset.baseHeight = height; 
+    el.dataset.baseHeight = height;
     el.style.height = `${height}%`;
-
-    // pastel + intenziteta glede na višino
-    el.style.background = `${pastelColors[id]} ${0.25 + height/100 * 0.5})`;
-
-    el.style.transition = "height 1s ease-in-out, background 1s ease-in-out";
+    el.style.background = `${pastelColors[id]}${0.25 + height/100*0.5})`;
+    el.style.transition = "height 1s ease-in-out,background 1s ease-in-out";
   }
 }
 
-// ✨ Subtilni dih
+// ✨ Subtilni dih barov
 setInterval(() => {
   const t = Date.now() / 3000;
   document.querySelectorAll(".bar").forEach(bar => {
@@ -499,7 +463,6 @@ setInterval(() => {
   });
 }, 50);
 
-
 // ===============================
 //  KLIC PO IZRAČUNU ENERGIJE
 // ===============================
@@ -509,17 +472,28 @@ function updateDailyEnergyBarometer(){
   }
 }
 
-
 // ===============================
 //   SERVICE WORKER (pusti)
 // ===============================
-if ('serviceWorker' in navigator) {
+if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
       .then(reg => console.log('Service Worker registered', reg))
       .catch(err => console.log('Service Worker registration failed', err));
   });
 }
+
+// ===============================
+//  AUTOMATSKI NALOŽI PREJŠNJE VREDNOSTI
+// ===============================
+window.addEventListener('load', () => {
+  const savedBirth = loadFromLocal("birthDate");
+  const savedEmail = loadFromLocal("email");
+  if(savedBirth) document.getElementById("birthDate").value = savedBirth;
+  if(savedEmail) document.getElementById("email").value = savedEmail;
+
+  // Prikaz današnjega Kina ob nalaganju strani
+  showKin(new Date(), "today");
+  if(savedBirth) showKin(new Date(savedBirth), "birth");
+});
 </script>
-</body>
-</html>
